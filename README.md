@@ -2,6 +2,8 @@
 
 PhishShield detects phishing across the four channels attackers actually use (**SMS/chat messages, emails, URLs and QR codes**) using machine-learning models trained on **590,000+ real-world samples from Kaggle**. It explains *why* each item is dangerous and trains users to spot phishing themselves.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/missmisba663-wq/phishshield)
+
 > Final Year Project · Python · scikit-learn · OpenCV · Flask · SQLite
 
 ---
