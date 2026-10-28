@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Threat Dashboard</h1>
+<p class="lead">Live statistics from scans on this PhishShield instance, plus model performance on held-out Kaggle test data.</p>
+
+<div class="grid grid-4">
+  <div class="card stat"><div class="value">{{ "{:,}".format(stats.total_scans) }}</div><div class="label">Total scans</div></div>
+  <div class="card stat"><div class="value" style="color:var(--danger)">{{ stats.by_verdict.get('phishing', 0) }}</div><div class="label">Phishing</div></div>
+  <div class="card stat"><div class="value" style="color:var(--warn)">{{ stats.by_verdict.get('suspicious', 0) }}</div><div class="label">Suspicious</div></div>
+  <div class="card stat"><div class="value" style="color:var(--safe)">{{ stats.by_verdict.get('safe', 0) }}</div><div class="label">Safe</div></div>
+</div>
+
+<div class="section grid grid-2">
+  <div class="card"><h3>Scans per day (last 14 days)</h3><canvas id="daily" height="200"></canvas></div>
+  <div class="card"><h3>Verdicts by channel</h3><canvas id="channels" height="200"></canvas></div>
+</div>
+
+<div class="section grid grid-2">
+  <div class="card"><h3>Most common red flags</h3>
+    {% if stats.top_flags %}<canvas id="flags" height="220"></canvas>{% else %}<p class="muted">No scans yet. <a href="/scan">Run your first scan</a>.</p>{% endif %}
+  </div>
+  <div class="card"><h3>Recent scans</h3>
+    <table><tr><th>Time</th><th>Channel</th><th>Content</th><th>Verdict</th></tr>
+      {% for r in stats.recent %}
+      <tr><td class="small muted">{{ r.ts[5:16].replace('T', ' ') }}</td><td>{{ r.channel|upper }}</td>
+        <td class="small mono" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.preview }}</td>
+        <td><span class="badge {{ r.verdict }}">{{ r.verdict }}</span></td></tr>
+      {% else %}<tr><td colspan="4" class="muted">No scans yet.</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+
+<h2 class="section">Model performance (test set)</h2>
+<div class="card">
+  <table>
+    <tr><th>Channel</th><th>Dataset</th><th class="num">Samples</th><th>Selected model</th>
+      <th class="num">Accuracy</th><th class="num">Precision</th><th class="num">Recall</th><th class="num">F1</th><th class="num">ROC-AUC</th></tr>
+    {% for ch in ['sms', 'email', 'url'] if reports[ch] %}{% set r = reports[ch] %}
+    <tr><td><b>{{ ch|upper }}</b></td><td class="small">{{ r.dataset.slug }}</td><td class="num">{{ "{:,}".format(r.n_samples) }}</td>
+      <td>{{ r.selected_model }}</td>
+      {% for m in ['accuracy','precision','recall','f1','roc_auc'] %}<td class="num">{{ "%.2f%%"|format(r.test_metrics[m]*100) }}</td>{% endfor %}</tr>
+    {% endfor %}
+  </table>
+  {% if reports.qr %}
+  <h3 style="margin-top:22px">QR end-to-end pipeline (decode → classify) on {{ reports.qr.n_urls }} held-out URLs</h3>
+  <table><tr><th>Image condition</th><th class="num">Decode rate</th><th class="num">Accuracy</th><th class="num">F1</th></tr>
+    {% for cond, m in reports.qr.conditions.items() %}
+    <tr><td>{{ cond|capitalize }}</td><td class="num">{{ "%.1f%%"|format(m.decode_rate*100) }}</td><td class="num">{{ "%.2f%%"|format(m.accuracy*100) }}</td><td class="num">{{ "%.2f%%"|format(m.f1*100) }}</td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+<div class="section grid grid-2">
+  {% for ch in ['sms', 'email', 'url'] if reports[ch] %}
+  <div class="card"><h3>{{ ch|upper }}: confusion matrix, ROC &amp; model comparison</h3>
+    <img class="report-img" src="/reports/{{ ch }}_report.png" alt="{{ ch }} model report"></div>
+  {% endfor %}
+</div>
+
+<h2 class="section" id="leaderboard">🏆 Awareness leaderboard</h2>
+<div class="card">
+  <p class="muted">{{ stats.quiz_attempts }} quiz attempt(s) · average score {{ stats.quiz_avg }}%</p>
+  <table><tr><th>#</th><th>Name</th><th class="num">Score</th><th>Date</th></tr>
+    {% for r in stats.leaderboard %}
+    <tr><td>{{ loop.index }}</td><td>{{ r.nickname }}</td><td class="num">{{ r.score }}/{{ r.total }}</td><td class="small muted">{{ r.ts[:10] }}</td></tr>
+    {% else %}<tr><td colspan="4" class="muted">No attempts yet. <a href="/training">Be the first!</a></td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const S = {{ stats|tojson }};
+Chart.defaults.color = "#9aa5d1";
+Chart.defaults.borderColor = "#26315f";
+const C = { safe: "#22c55e", suspicious: "#f59e0b", phishing: "#ef4444" };
+
+new Chart(document.getElementById("daily"), {
+  type: "bar",
+  data: { labels: S.daily.map(d => d.date.slice(5)), datasets: [{ label: "Scans", data: S.daily.map(d => d.count), backgroundColor: "#5b8cff", borderRadius: 4 }] },
+  options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+});
+
+const chans = ["sms", "email", "url", "qr"];
+new Chart(document.getElementById("channels"), {
+  type: "bar",
+  data: { labels: chans.map(c => c.toUpperCase()), datasets: ["safe", "suspicious", "phishing"].map(v => ({
+    label: v, data: chans.map(c => (S.by_channel[c] || {})[v] || 0), backgroundColor: C[v], borderRadius: 4 })) },
+  options: { scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } }
+});
+
+if (S.top_flags.length) new Chart(document.getElementById("flags"), {
+  type: "bar",
+  data: { labels: S.top_flags.map(f => f.flag), datasets: [{ data: S.top_flags.map(f => f.count), backgroundColor: "#7c5cff", borderRadius: 4 }] },
+  options: { indexAxis: "y", plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Learn{% endblock %}
+{% block content %}
+<h1>Phishing Awareness Guide</h1>
+<p class="lead">Phishing is the #1 entry point for cyber attacks. More than 90% of breaches start with a message that tricks a person.
+  Learn the attack types, the warning signs, and what to do.</p>
+
+<h2>Types of phishing</h2>
+<div class="grid grid-3">
+  {% for icon, name, desc, ex in [
+    ('📧','Email phishing','Mass emails impersonating banks, delivery companies or IT teams to steal passwords.','"Your mailbox is full. Log in to keep receiving emails."'),
+    ('🎯','Spear phishing','Targeted emails using your name, role or colleagues to look believable.','"Hi Alex, here is the revised project report you asked for."'),
+    ('👔','Business Email Compromise','Attacker poses as a CEO/vendor and asks for transfers or gift cards.','"I need you to process this urgent wire today. Keep it confidential."'),
+    ('💬','Smishing (SMS)','Text messages with fake KYC, delivery, electricity-bill or prize links.','"Electricity will be disconnected tonight. Call officer 98XXXXXX."'),
+    ('📞','Vishing (voice)','Calls from fake bank/police/customer care asking for OTPs or remote-access apps.','"I am calling from your bank. Please read the OTP to verify."'),
+    ('📷','Quishing (QR)','Malicious QR codes on posters, parking meters, emails, or UPI "receive money" tricks.','"Scan this QR to receive your refund."'),
+  ] %}
+  <div class="card tip-card"><h3>{{ icon }} {{ name }}</h3><p class="muted">{{ desc }}</p><p class="small"><i>{{ ex }}</i></p></div>
+  {% endfor %}
+</div>
+
+<div class="section grid grid-2">
+  <div class="card">
+    <h2>🚩 The 8 red flags</h2>
+    <ol>
+      <li><b>Urgency</b>: "within 24 hours", "final notice".</li>
+      <li><b>Threats</b>: account blocked, legal action, arrest.</li>
+      <li><b>Requests for secrets</b>: passwords, OTP, PIN, CVV.</li>
+      <li><b>Too good to be true</b>: prizes, refunds, job offers.</li>
+      <li><b>Mismatched sender</b>: display name ≠ email address; Reply-To differs.</li>
+      <li><b>Suspicious links</b>: look-alike domains, IPs, shorteners, odd TLDs.</li>
+      <li><b>Unexpected attachments</b>: .html, .zip, .exe, macro documents.</li>
+      <li><b>Generic greeting &amp; poor grammar</b>: "Dear Customer".</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>🔍 How to read a URL</h2>
+    <p class="muted">The real owner is the part <b>just before the first single "/"</b>, read <b>right to left</b>.</p>
+    <div class="urlbar small" style="margin:12px 0">https://paypal.com.<b style="color:#dc2626">secure-verify.xyz</b>/login</div>
+    <p class="small">Real domain = <b>secure-verify.xyz</b>, not PayPal.</p>
+    <div class="urlbar small" style="margin:12px 0">https://accounts.<b style="color:#16a34a">google.com</b>/signin</div>
+    <p class="small">Real domain = <b>google.com</b>. Legit.</p>
+    <p class="muted small">Watch for swapped characters: <code>rn</code> vs <code>m</code>, <code>0</code> vs <code>o</code>, <code>1</code> vs <code>l</code>, and Unicode look-alikes (<code>xn--</code>).</p>
+  </div>
+</div>
+
+<div class="section grid grid-2">
+  <div class="card">
+    <h2>✅ If you receive a phishing message</h2>
+    <ul>
+      <li>Don't click, reply, call back or scan.</li>
+      <li>Verify through the official app or a number you look up yourself.</li>
+      <li>Report phishing emails to your IT/security team (or use "Report phishing" in Gmail/Outlook).</li>
+      <li>India: report at <b>cybercrime.gov.in</b> or call <b>1930</b>; report spam SMS on <b>Sanchar Saathi (Chakshu)</b>.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>🆘 If you already clicked</h2>
+    <ul>
+      <li>Change the password immediately (and anywhere you reused it).</li>
+      <li>Enable 2-factor authentication (preferably an authenticator app / passkey).</li>
+      <li>If you shared card/bank details, call your bank to block the card <b>now</b>.</li>
+      <li>If money was sent, call <b>1930</b> within the "golden hour" to freeze the transfer.</li>
+      <li>Run an antivirus scan if you downloaded anything.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section card" style="text-align:center">
+  <h2>Ready to test yourself?</h2>
+  <a class="btn" href="/training">Start the Spot-the-Phish challenge</a>
+</div>
+{% endblock %}

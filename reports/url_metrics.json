@@ -1,0 +1,140 @@
+{
+  "task": "url",
+  "trained_at": "2026-10-28T23:36:23",
+  "dataset": {
+    "slug": "taruntiwarihp/phishing-site-urls",
+    "file": "phishing_site_urls.csv",
+    "description": "Phishing Site URLs - ~549k URLs labelled good/bad"
+  },
+  "n_samples": 506312,
+  "n_train": 405049,
+  "n_test": 101263,
+  "phishing_rate": 0.2241,
+  "model_comparison_validation": {
+    "LogisticRegression": {
+      "accuracy": 0.9733,
+      "precision": 0.971,
+      "recall": 0.9077,
+      "f1": 0.9383,
+      "roc_auc": 0.9946,
+      "train_seconds": 80.3
+    },
+    "SGD (log loss)": {
+      "accuracy": 0.972,
+      "precision": 0.9725,
+      "recall": 0.9004,
+      "f1": 0.935,
+      "roc_auc": 0.9938,
+      "train_seconds": 47.4
+    },
+    "SGD (modified huber)": {
+      "accuracy": 0.972,
+      "precision": 0.9396,
+      "recall": 0.9351,
+      "f1": 0.9373,
+      "roc_auc": 0.9826,
+      "train_seconds": 47.6
+    }
+  },
+  "selected_model": "LogisticRegression",
+  "fit_seconds": 437.3,
+  "test_metrics": {
+    "accuracy": 0.9831,
+    "precision": 0.9798,
+    "recall": 0.9438,
+    "f1": 0.9615,
+    "roc_auc": 0.9971
+  },
+  "confusion_matrix": [
+    [
+      78133,
+      441
+    ],
+    [
+      1274,
+      21415
+    ]
+  ],
+  "top_phishing_features": [
+    {
+      "feature": "exe",
+      "weight": 9.834
+    },
+    {
+      "feature": "js",
+      "weight": 8.802
+    },
+    {
+      "feature": "2015",
+      "weight": 6.87
+    },
+    {
+      "feature": ".php",
+      "weight": 6.701
+    },
+    {
+      "feature": "php",
+      "weight": 6.693
+    },
+    {
+      "feature": ".ph",
+      "weight": 6.459
+    },
+    {
+      "feature": "nwww",
+      "weight": 6.405
+    },
+    {
+      "feature": "libraries",
+      "weight": 6.183
+    },
+    {
+      "feature": "includes",
+      "weight": 6.088
+    },
+    {
+      "feature": "pastehtml",
+      "weight": 6.04
+    },
+    {
+      "feature": "casts",
+      "weight": 5.919
+    },
+    {
+      "feature": "tmp",
+      "weight": 5.374
+    },
+    {
+      "feature": "/im",
+      "weight": 5.322
+    },
+    {
+      "feature": "com/8",
+      "weight": 5.322
+    },
+    {
+      "feature": "om/8",
+      "weight": 5.321
+    },
+    {
+      "feature": "mxp",
+      "weight": 5.199
+    },
+    {
+      "feature": "paypal",
+      "weight": 5.152
+    },
+    {
+      "feature": "indes",
+      "weight": 5.141
+    },
+    {
+      "feature": "m/8",
+      "weight": 5.14
+    },
+    {
+      "feature": "counter",
+      "weight": 5.12
+    }
+  ]
+}

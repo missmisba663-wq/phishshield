@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<h1>About PhishShield <span class="pill">v{{ version }}</span></h1>
+<p class="lead">An AI-powered, multi-channel phishing detection and awareness platform built in Python with scikit-learn, OpenCV and Flask,
+  trained on public Kaggle datasets.</p>
+
+<div class="card">
+  <h2>System architecture</h2>
+<pre class="mono small" style="overflow-x:auto;line-height:1.45">
+  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌───────────────────┐
+  │ SMS / chat   │   │ Email / .eml │   │     URL      │   │  QR image/camera  │
+  └──────┬───────┘   └──────┬───────┘   └──────┬───────┘   └─────────┬─────────┘
+         │                  │ header parser    │                     │ OpenCV decode
+         │                  │ (SPF/DKIM, spoof)│                     │ payload type
+         ▼                  ▼                  ▼                     ▼ (URL / UPI / Wi-Fi)
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │ Feature extraction: TF-IDF words + char n-grams, 22 lexical URL features    │
+  ├─────────────────────────────────────────────────────────────────────────────┤
+  │ ML models (best of LogReg / LinearSVC / SGD / NB per channel)               │
+  │ + Rule engine (urgency, threats, credential requests, brand abuse …)        │
+  │ + Embedded-link analysis (URLs inside SMS/email go through the URL model)   │
+  ├─────────────────────────────────────────────────────────────────────────────┤
+  │ Risk score 0-100 = 0.8 × ML probability + red-flag points  → safe/suspicious/phishing │
+  │ Explainability: per-token contribution (tf-idf × model weight)              │
+  └──────────────────────────────┬──────────────────────────────────────────────┘
+                                 ▼
+        Flask web UI  ·  REST API /api/v1  ·  SQLite history  ·  Awareness quiz
+</pre>
+</div>
+
+<div class="section grid grid-2">
+  <div class="card">
+    <h2>Datasets (Kaggle)</h2>
+    <table><tr><th>Channel</th><th>Dataset</th><th class="num">Rows</th></tr>
+      {% for ch in ['sms', 'email', 'url'] if reports[ch] %}
+      <tr><td>{{ ch|upper }}</td><td><a href="https://www.kaggle.com/datasets/{{ reports[ch].dataset.slug }}" target="_blank" rel="noopener">{{ reports[ch].dataset.slug }}</a></td>
+        <td class="num">{{ "{:,}".format(reports[ch].n_samples) }}</td></tr>
+      {% endfor %}
+      <tr><td>QR</td><td colspan="2" class="small muted">Synthetic QR images generated from the held-out URL test set (clean, blurred, rotated, noisy)</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>REST API</h2>
+<pre class="mono small" style="overflow-x:auto">POST /api/v1/scan/sms     {"text": "..."}
+POST /api/v1/scan/email   {"email": "..."}  or file=.eml
+POST /api/v1/scan/url     {"url": "..."}
+POST /api/v1/scan/qr      file=image  or {"payload": "..."}
+GET  /api/v1/stats
+GET  /api/v1/health</pre>
+    <p class="small muted">Example:</p>
+<pre class="mono small" style="overflow-x:auto">curl -X POST http://127.0.0.1:5000/api/v1/scan/url \
+     -H "Content-Type: application/json" \
+     -d '{"url": "http://paypa1-login.xyz/verify"}'</pre>
+  </div>
+</div>
+
+<div class="section card">
+  <h2>Limitations &amp; future work</h2>
+  <ul class="muted">
+    <li>URL analysis is lexical only (no live page fetch / WHOIS) for safety and speed; a sandboxed page-content model could be added.</li>
+    <li>The SMS dataset is general spam; dedicated smishing datasets in Indian languages would improve regional coverage.</li>
+    <li>Transformer models (DistilBERT) may improve accuracy at higher compute cost; linear models were chosen for speed and explainability.</li>
+    <li>Browser extension and email-client add-in would bring real-time protection to where users actually click.</li>
+  </ul>
+</div>
+{% endblock %}

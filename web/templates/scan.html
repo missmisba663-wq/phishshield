@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Scanner{% endblock %}
+{% block content %}
+<h1>Phishing Scanner</h1>
+<p class="lead">Paste a suspicious message, email, link, or upload a QR code. Nothing is clicked or opened. Analysis is static and safe.</p>
+
+<div class="tabs" role="tablist">
+  <button class="tab" data-tab="sms">💬 Message</button>
+  <button class="tab" data-tab="email">📧 Email</button>
+  <button class="tab" data-tab="url">🔗 URL</button>
+  <button class="tab" data-tab="qr">📷 QR Code</button>
+</div>
+
+<div class="card">
+  <!-- SMS -->
+  <form class="panel" id="panel-sms" data-channel="sms">
+    <label for="sms-text">SMS, WhatsApp or chat message</label>
+    <textarea id="sms-text" name="text" rows="5" placeholder="Paste the message here..."></textarea>
+    <div class="row"><span class="muted small">Try:</span><div class="samples">
+      <span class="chip" data-fill="sms-text" data-value="URGENT! Your SBI account has been suspended due to incomplete KYC. Update your PAN now to avoid block: http://sbi-kyc-update.xyz/login">KYC scam</span>
+      <span class="chip" data-fill="sms-text" data-value="Congratulations! You have won a FREE iPhone 15 in our lucky draw. Claim your prize now at bit.ly/claim-iph15 before it expires today!!">Prize scam</span>
+      <span class="chip" data-fill="sms-text" data-value="Your parcel could not be delivered due to unpaid customs fee of Rs 25. Pay here within 24 hours: https://indiapost-redelivery.top/pay">Delivery scam</span>
+      <span class="chip" data-fill="sms-text" data-value="Hey, are we still meeting for lunch tomorrow at 1? I'll book the table near the office.">Normal chat</span>
+    </div></div>
+    <div class="row"><button class="btn" type="submit">Analyse message</button></div>
+  </form>
+
+  <!-- EMAIL -->
+  <form class="panel" id="panel-email" data-channel="email">
+    <label for="email-text">Email content <span class="muted small">(paste the body, or the full raw source with headers for spoofing checks)</span></label>
+    <textarea id="email-text" name="email" rows="10" placeholder="From: ...&#10;Subject: ...&#10;&#10;Body..."></textarea>
+    <div class="row">
+      <label class="btn secondary small" style="margin:0">📎 Upload .eml file<input type="file" id="eml-file" accept=".eml,.txt,message/rfc822" hidden></label>
+      <span id="eml-name" class="muted small"></span>
+    </div>
+    <div class="row"><span class="muted small">Try:</span><div class="samples">
+      <span class="chip" data-fill="email-text" data-value="From: &quot;PayPal Security&quot; <service@paypa1-secure.com>
+Reply-To: billing.dept@protonmail.com
+Subject: Your account has been limited
+Authentication-Results: mx.google.com; spf=fail; dkim=none; dmarc=fail
+
+Dear Customer,
+
+We noticed unusual activity on your PayPal account and it has been temporarily suspended. To restore access you must verify your identity within 24 hours.
+
+Click here to confirm your account: http://paypal.com.verify-account.xyz/webscr/login
+
+Failure to do so will result in permanent account closure.
+
+PayPal Security Team">Spoofed PayPal (with headers)</span>
+      <span class="chip" data-fill="email-text" data-value="Subject: Team offsite agenda for Friday
+
+Hi all,
+
+Attached is the agenda for Friday's offsite. We'll start at 10am in the main conference room, lunch is provided. Let me know by Wednesday if you have any dietary requirements.
+
+Thanks,
+Anita">Normal work email</span>
+      <span class="chip" data-fill="email-text" data-value="Subject: URGENT BUSINESS PROPOSAL
+
+DEAR FRIEND,
+
+I AM BARRISTER JAMES, PERSONAL ATTORNEY TO LATE MR. ANDREW WHO DIED IN A CAR ACCIDENT. HE LEFT A SUM OF US$12,500,000 IN A BANK HERE. I NEED YOUR ASSISTANCE TO TRANSFER THIS FUND. YOU WILL RECEIVE 40% FOR YOUR ASSISTANCE. KEEP THIS STRICTLY CONFIDENTIAL. SEND YOUR FULL NAME, BANK ACCOUNT AND PHONE NUMBER.">419 advance-fee</span>
+    </div></div>
+    <div class="row"><button class="btn" type="submit">Analyse email</button></div>
+  </form>
+
+  <!-- URL -->
+  <form class="panel" id="panel-url" data-channel="url">
+    <label for="url-text">Website link</label>
+    <input type="text" id="url-text" name="url" placeholder="https://example.com/login" autocomplete="off" spellcheck="false">
+    <div class="row"><span class="muted small">Try:</span><div class="samples">
+      <span class="chip" data-fill="url-text" data-value="http://paypal.com.secure-login-verify.xyz/webscr?cmd=_login">Brand subdomain</span>
+      <span class="chip" data-fill="url-text" data-value="http://185.234.72.19/linkedin/jobs/apply/login.php">IP address</span>
+      <span class="chip" data-fill="url-text" data-value="https://amaz0n-delivery-reschedule.top/track/IN83920?pay=29">Typosquat</span>
+      <span class="chip" data-fill="url-text" data-value="https://docs.python.org/3/tutorial/index.html">python.org</span>
+      <span class="chip" data-fill="url-text" data-value="https://en.wikipedia.org/wiki/Phishing">wikipedia.org</span>
+    </div></div>
+    <div class="row"><button class="btn" type="submit">Check link</button></div>
+  </form>
+
+  <!-- QR -->
+  <form class="panel" id="panel-qr" data-channel="qr">
+    <label>QR code image</label>
+    <div class="dropzone" id="dropzone">
+      <div style="font-size:2rem">📷</div>
+      <div><b>Drop an image here</b> or click to choose (PNG/JPG, photo or screenshot)</div>
+      <div id="qr-name" class="small" style="margin-top:6px"></div>
+      <input type="file" id="qr-file" accept="image/*" hidden>
+    </div>
+    <div class="row">
+      <button class="btn secondary small" type="button" id="cam-btn">🎥 Scan with camera</button>
+      <span class="muted small">Try a sample:</span>
+      <div class="samples">
+        {% for f, n in [('phish_paypal.png','Fake PayPal'),('upi_refund_scam.png','UPI "refund" scam'),('phish_ip_bank.png','IP bank page'),('wifi_open.png','Open Wi-Fi'),('safe_github.png','GitHub login')] %}
+        <span class="chip" data-qr="/samples/qr/{{ f }}">{{ n }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    <video id="camera" playsinline muted></video>
+    <canvas id="cam-canvas" hidden></canvas>
+  </form>
+  <div id="error" class="error"></div>
+</div>
+
+<div id="result" class="result"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="{{ url_for('static', filename='result.js') }}"></script>
+<script>
+const $ = s => document.querySelector(s);
+const resultEl = $("#result"), errEl = $("#error");
+let emlFile = null;
+
+function showTab(name) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + name));
+  history.replaceState(null, "", "?tab=" + name);
+}
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => showTab(t.dataset.tab));
+showTab("{{ tab }}");
+
+document.querySelectorAll("[data-fill]").forEach(c => c.onclick = () => {
+  $("#" + c.dataset.fill).value = c.dataset.value;
+  if (c.dataset.fill === "email-text") { emlFile = null; $("#eml-name").textContent = ""; }
+});
+
+async function run(channel, body, isForm, btn) {
+  errEl.textContent = "";
+  if (btn) { btn.disabled = true; btn.dataset.label = btn.textContent; btn.textContent = "Analysing…"; }
+  try { renderResult(resultEl, await postScan(channel, body, isForm)); }
+  catch (e) { errEl.textContent = e.message; }
+  finally { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label; } }
+}
+
+$("#panel-sms").onsubmit = e => { e.preventDefault(); run("sms", { text: $("#sms-text").value }, false, e.submitter); };
+$("#panel-url").onsubmit = e => { e.preventDefault(); run("url", { url: $("#url-text").value }, false, e.submitter); };
+$("#eml-file").onchange = e => { emlFile = e.target.files[0]; $("#eml-name").textContent = emlFile ? emlFile.name : ""; };
+$("#panel-email").onsubmit = e => {
+  e.preventDefault();
+  if (emlFile) { const fd = new FormData(); fd.append("file", emlFile); run("email", fd, true, e.submitter); }
+  else run("email", { email: $("#email-text").value }, false, e.submitter);
+};
+
+// ----- QR upload -----
+const dz = $("#dropzone"), qrInput = $("#qr-file");
+function scanQrBlob(blob, name) {
+  $("#qr-name").textContent = name;
+  const fd = new FormData(); fd.append("file", blob, name);
+  run("qr", fd, true);
+}
+dz.onclick = () => qrInput.click();
+qrInput.onchange = e => e.target.files[0] && scanQrBlob(e.target.files[0], e.target.files[0].name);
+dz.ondragover = e => { e.preventDefault(); dz.classList.add("drag"); };
+dz.ondragleave = () => dz.classList.remove("drag");
+dz.ondrop = e => { e.preventDefault(); dz.classList.remove("drag"); const f = e.dataTransfer.files[0]; f && scanQrBlob(f, f.name); };
+document.querySelectorAll("[data-qr]").forEach(c => c.onclick = async () => {
+  const blob = await (await fetch(c.dataset.qr)).blob();
+  scanQrBlob(blob, c.dataset.qr.split("/").pop());
+});
+
+// ----- QR camera (decoded in the browser with jsQR) -----
+let stream = null;
+$("#cam-btn").onclick = async () => {
+  const video = $("#camera"), canvas = $("#cam-canvas"), ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; video.style.display = "none"; return; }
+  try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); }
+  catch { errEl.textContent = "Camera not available. Upload an image instead."; return; }
+  video.srcObject = stream; video.style.display = "block"; await video.play();
+  const tick = () => {
+    if (!stream) return;
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      const code = window.jsQR && jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
+      if (code && code.data) {
+        stream.getTracks().forEach(t => t.stop()); stream = null; video.style.display = "none";
+        $("#qr-name").textContent = "Decoded from camera: " + code.data;
+        run("qr", { payload: code.data }, false);
+        return;
+      }
+    }
+    requestAnimationFrame(tick);
+  };
+  tick();
+};
+</script>
+{% endblock %}

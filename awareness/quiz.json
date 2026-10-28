@@ -1,0 +1,104 @@
+[
+  {
+    "id": "q1", "channel": "sms", "scenario": "You receive this text message on your phone.",
+    "content": {"sender": "VM-SBIBNK", "text": "Dear Customer, your SBI YONO account will be blocked today. Update your PAN card immediately: http://sbi-yono-kyc.co.in/update to avoid suspension."},
+    "answer": "phishing",
+    "explanation": "Banks never ask you to update KYC/PAN through a link in an SMS. The domain 'sbi-yono-kyc.co.in' is not SBI's (onlinesbi.sbi).",
+    "clues": ["Threat: account will be blocked today", "Urgency: 'immediately'", "Look-alike domain sbi-yono-kyc.co.in", "Asks for PAN/KYC details"]
+  },
+  {
+    "id": "q2", "channel": "sms", "scenario": "You just ordered food and get this SMS.",
+    "content": {"sender": "AX-SWIGGY", "text": "Your Swiggy order #48213 has been picked up by Ramesh and will arrive in 22 mins. Track it in the Swiggy app."},
+    "answer": "legit",
+    "explanation": "It matches something you just did, contains no link, and asks for nothing. It only points you to the official app.",
+    "clues": ["Expected: you just placed an order", "No link to click", "No request for data or money"]
+  },
+  {
+    "id": "q3", "channel": "email", "scenario": "This email lands in your work inbox.",
+    "content": {"from": "Microsoft 365 <no-reply@micros0ft-support.com>", "subject": "ACTION REQUIRED: Password expires in 2 hours",
+      "body": "Dear User,\n\nYour Office 365 password will expire in 2 hours. To keep the same password click below and verify your login details.\n\n[ Keep My Password ]\n\nFailure to verify will result in loss of email access.\n\nMicrosoft Security Team"},
+    "answer": "phishing",
+    "explanation": "The sender domain uses a zero instead of 'o' (micros0ft), the greeting is generic, and it threatens loss of access to rush you into entering your password.",
+    "clues": ["Typosquatted domain: micros0ft-support.com", "Generic greeting 'Dear User'", "2-hour deadline", "Asks you to 'verify your login details'"]
+  },
+  {
+    "id": "q4", "channel": "email", "scenario": "Your manager's name appears as the sender.",
+    "content": {"from": "Priya Sharma (CEO) <priya.sharma.ceo@gmail.com>", "subject": "Quick favour - confidential",
+      "body": "Hi,\n\nAre you at your desk? I'm in a meeting and need you to buy 5 Amazon gift cards of Rs 10,000 each for a client. Keep this between us for now. Send me the codes by email, I'll reimburse you today.\n\nPriya\nSent from my iPhone"},
+    "answer": "phishing",
+    "explanation": "This is Business Email Compromise (CEO fraud). Executives don't ask staff to buy gift cards from personal Gmail accounts, and the request for secrecy stops you from checking.",
+    "clues": ["Company CEO using a gmail.com address", "Gift-card request", "Secrecy: 'keep this between us'", "Urgency + authority pressure"]
+  },
+  {
+    "id": "q5", "channel": "email", "scenario": "You signed up for a GitHub account yesterday.",
+    "content": {"from": "GitHub <noreply@github.com>", "subject": "[GitHub] Please verify your email address",
+      "body": "Hi alex-dev,\n\nPlease verify your email address so we know it's really you. Visit your GitHub settings or use the link below:\nhttps://github.com/users/alex-dev/emails/verify\n\nIf you didn't create an account, you can ignore this email.\n\nThanks,\nThe GitHub Team"},
+    "answer": "legit",
+    "explanation": "Expected after a sign-up, it addresses you by username, the link goes to github.com itself, and it lets you ignore it with no threats.",
+    "clues": ["Sender domain is github.com", "Link domain is github.com", "Personalised greeting", "No threat or urgency"]
+  },
+  {
+    "id": "q6", "channel": "url", "scenario": "Which of these links is safe to log in to PayPal? You're shown this one:",
+    "content": {"url": "http://paypal.com.secure-login-verify.xyz/webscr?cmd=_login"},
+    "answer": "phishing",
+    "explanation": "Read domains from right to left: the real domain is 'secure-login-verify.xyz'. 'paypal.com' is only a subdomain prefix, and the link has no HTTPS.",
+    "clues": ["Real domain: secure-login-verify.xyz", "Brand used as a subdomain", ".xyz high-risk TLD", "No HTTPS"]
+  },
+  {
+    "id": "q7", "channel": "url", "scenario": "A friend shares this link to a Python tutorial.",
+    "content": {"url": "https://docs.python.org/3/tutorial/index.html"},
+    "answer": "legit",
+    "explanation": "The registered domain is python.org, the official Python site, over HTTPS with a clean, readable path.",
+    "clues": ["Registered domain python.org", "HTTPS", "No credential keywords"]
+  },
+  {
+    "id": "q8", "channel": "url", "scenario": "A pop-up says your Amazon parcel is held. The link is:",
+    "content": {"url": "https://amaz0n-delivery-reschedule.top/track/IN83920?pay=29"},
+    "answer": "phishing",
+    "explanation": "Fake delivery fees are a top smishing scam. 'amaz0n' uses a zero, the TLD is .top, and asking for a small fee is meant to steal card details.",
+    "clues": ["Typosquat 'amaz0n'", "High-risk .top TLD", "Small fee request (pay=29)"]
+  },
+  {
+    "id": "q9", "channel": "qr", "scenario": "You're selling a sofa on OLX. The 'buyer' sends this QR and says: 'Scan it to RECEIVE Rs 4,999 advance.'",
+    "content": {"image": "/samples/qr/upi_refund_scam.png"},
+    "answer": "phishing",
+    "explanation": "UPI QR codes only SEND money. You never scan a QR or enter your UPI PIN to receive money. This QR asks you to pay Rs 4,999 to a stranger.",
+    "clues": ["UPI 'pay' request disguised as a refund", "Pre-filled amount", "Buyer pressuring you to scan"]
+  },
+  {
+    "id": "q10", "channel": "qr", "scenario": "A sticker on a parking meter says 'Scan to pay parking'. It decodes to:",
+    "content": {"url": "http://bit.ly/3xVerify-Acct"},
+    "answer": "phishing",
+    "explanation": "'Quishing' stickers are pasted over real QR codes. A URL shortener hides the destination, and there's no HTTPS. Pay through the official parking app instead.",
+    "clues": ["Shortened link hides destination", "No HTTPS", "Sticker on public infrastructure"]
+  },
+  {
+    "id": "q11", "channel": "sms", "scenario": "Unknown number, WhatsApp message.",
+    "content": {"sender": "+44 7700 900123", "text": "Hi Mum, I dropped my phone in the sink, this is my new number. Can you transfer Rs 15,000 urgently? I need to pay a bill today, will explain later! Don't call, my mic is broken"},
+    "answer": "phishing",
+    "explanation": "The 'Hi Mum/Dad' scam. A new number, an urgent money request and 'don't call' are all there to stop you verifying. Call the real number you already have.",
+    "clues": ["Unknown/foreign number claiming to be family", "Urgent money transfer", "Prevents verification ('don't call')"]
+  },
+  {
+    "id": "q12", "channel": "sms", "scenario": "You are logging in to your bank app right now.",
+    "content": {"sender": "AD-HDFCBK", "text": "248913 is your OTP for login to HDFC Bank NetBanking. Valid for 5 mins. Do not share this OTP with anyone. -HDFC Bank"},
+    "answer": "legit",
+    "explanation": "An OTP you requested, with a warning not to share it. Legitimate. The danger comes if someone then CALLS asking you to read it out.",
+    "clues": ["You triggered the login", "Explicit 'do not share' warning", "No link"]
+  },
+  {
+    "id": "q13", "channel": "email", "scenario": "Email from an address you don't recognise.",
+    "content": {"from": "Income Tax Department <refunds@incometax-gov-refund.in>", "subject": "Tax Refund of Rs 18,450 Approved",
+      "body": "Dear Taxpayer,\n\nAfter the last annual calculation you are eligible to receive a tax refund of Rs 18,450. Please submit the refund form with your bank account and debit card details within 48 hours.\n\nDownload: Refund_Form.html\n\nIncome Tax Department"},
+    "answer": "phishing",
+    "explanation": "Government sites end in .gov.in. Real refunds go to your pre-validated bank account automatically, and a .html attachment is a classic credential-harvesting form.",
+    "clues": ["Fake domain incometax-gov-refund.in", "Asks for debit card details", ".html attachment", "48-hour deadline"]
+  },
+  {
+    "id": "q14", "channel": "url", "scenario": "Link inside a 'LinkedIn job offer' message:",
+    "content": {"url": "http://185.234.72.19/linkedin/jobs/apply/login.php"},
+    "answer": "phishing",
+    "explanation": "Real companies don't host login pages on bare IP addresses. The brand name only appears in the path.",
+    "clues": ["Raw IP address host", "Brand in path, not domain", "login.php over HTTP"]
+  }
+]

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Awareness Training{% endblock %}
+{% block content %}
+<h1>Spot the Phish 🎯</h1>
+<p class="lead">{{ questions|length }} real-world scenarios across SMS, email, links and QR codes. Decide: phishing or legitimate?
+  After each answer you'll see the clues, and you can ask PhishShield's AI for its opinion.</p>
+
+<div class="quiz-progress"><div id="progress" style="width:0%"></div></div>
+<div class="row" style="justify-content:space-between;margin:-6px 0 14px">
+  <span class="muted small" id="counter"></span><span class="small">Score: <b id="score">0</b></span>
+</div>
+
+<div class="card" id="quiz">
+  <div class="muted small" id="channel"></div>
+  <h2 id="scenario"></h2>
+  <div id="content" style="margin-top:14px"></div>
+  <div class="answer-btns" id="answers">
+    <button class="btn phish" data-a="phishing">🚩 Phishing</button>
+    <button class="btn legit" data-a="legit">✅ Legitimate</button>
+  </div>
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<div class="card" id="finish" style="display:none;text-align:center">
+  <div style="font-size:3rem" id="medal"></div>
+  <h2 id="final"></h2>
+  <p class="muted" id="final-msg"></p>
+  <div class="row" style="justify-content:center">
+    <input type="text" id="nick" placeholder="Nickname for the leaderboard (optional)" style="max-width:320px">
+    <button class="btn" id="save">Save score</button>
+    <a class="btn secondary" href="/training">Try again</a>
+  </div>
+  <p class="small" id="saved"></p>
+</div>
+<div id="ai" class="result"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='result.js') }}"></script>
+<script>
+const Q = {{ questions|tojson }};
+const ICON = { sms: "💬 SMS / chat message", email: "📧 Email", url: "🔗 Website link", qr: "📷 QR code" };
+let i = 0, score = 0;
+const $ = s => document.querySelector(s);
+
+function render() {
+  const q = Q[i];
+  $("#progress").style.width = (i / Q.length * 100) + "%";
+  $("#counter").textContent = `Question ${i + 1} of ${Q.length}`;
+  $("#channel").textContent = ICON[q.channel];
+  $("#scenario").textContent = q.scenario;
+  const c = q.content;
+  let html = "";
+  if (q.channel === "sms") html = `<div class="phone"><div class="sender">${esc(c.sender)}</div><div class="bubble">${esc(c.text)}</div></div>`;
+  else if (q.channel === "email") html = `<div class="mail"><div class="hdr"><b>From:</b> ${esc(c.from)}<br><b>Subject:</b> ${esc(c.subject)}</div><div class="body">${esc(c.body)}</div></div>`;
+  else if (c.image) html = `<img src="${esc(c.image)}" alt="QR code" style="width:220px;border-radius:10px;background:#fff">`;
+  else html = `<div class="urlbar">🔒 ${esc(c.url)}</div>`;
+  $("#content").innerHTML = html;
+  $("#answers").style.display = "flex";
+  $("#feedback").className = "feedback";
+  $("#ai").className = "result";
+}
+
+document.querySelectorAll("#answers .btn").forEach(b => b.onclick = async () => {
+  const q = Q[i];
+  const r = await (await fetch("/api/v1/quiz/answer", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: q.id, answer: b.dataset.a }) })).json();
+  if (r.correct) score++;
+  $("#score").textContent = score;
+  $("#answers").style.display = "none";
+  const fb = $("#feedback");
+  fb.className = "feedback show " + (r.correct ? "right" : "wrong");
+  fb.innerHTML = `<h3>${r.correct ? "✅ Correct!" : "❌ Not quite."} This is <u>${r.answer === "phishing" ? "PHISHING" : "LEGITIMATE"}</u>.</h3>
+    <p>${esc(r.explanation)}</p><b>Clues:</b><ul>${r.clues.map(c => `<li>${esc(c)}</li>`).join("")}</ul>
+    <div class="row"><button class="btn secondary small" id="ask-ai">🧠 What does PhishShield AI say?</button>
+    <button class="btn small" id="next">${i + 1 < Q.length ? "Next question →" : "See results"}</button></div>`;
+  $("#next").onclick = () => { i++; i < Q.length ? render() : finish(); };
+  $("#ask-ai").onclick = async e => {
+    e.target.disabled = true;
+    const c = q.content;
+    let res;
+    try {
+      if (q.channel === "sms") res = await postScan("sms", { text: c.text });
+      else if (q.channel === "email") res = await postScan("email", { email: `From: ${c.from}\nSubject: ${c.subject}\n\n${c.body}` });
+      else if (c.image) { const fd = new FormData(); fd.append("file", await (await fetch(c.image)).blob(), "q.png"); res = await postScan("qr", fd, true); }
+      else res = await postScan(q.channel === "qr" ? "qr" : "url", q.channel === "qr" ? { payload: c.url } : { url: c.url });
+      renderResult($("#ai"), res);
+    } catch (err) { alert(err.message); }
+  };
+});
+
+function finish() {
+  $("#progress").style.width = "100%";
+  $("#quiz").style.display = "none"; $("#ai").className = "result";
+  $("#finish").style.display = "block";
+  const pct = Math.round(score / Q.length * 100);
+  $("#medal").textContent = pct >= 90 ? "🏆" : pct >= 70 ? "🥈" : pct >= 50 ? "🥉" : "📚";
+  $("#final").textContent = `You scored ${score} / ${Q.length} (${pct}%)`;
+  $("#final-msg").textContent = pct >= 90 ? "Excellent! You're a human firewall." :
+    pct >= 70 ? "Good job. Review the clues you missed on the Learn page." :
+    "Phishers would catch you today. Read the Learn page and try again!";
+}
+$("#save").onclick = async () => {
+  await fetch("/api/v1/quiz/submit", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nickname: $("#nick").value, score }) });
+  $("#saved").innerHTML = 'Saved! See the <a href="/dashboard#leaderboard">leaderboard</a>.';
+  $("#save").disabled = true;
+};
+render();
+</script>
+{% endblock %}

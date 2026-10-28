@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+data/raw/
+instance/
+.pytest_cache/
+# Trained models in models/ ARE committed (~11 MB) so the app can be deployed without retraining.

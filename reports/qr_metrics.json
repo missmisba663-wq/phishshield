@@ -1,0 +1,34 @@
+{
+  "task": "qr",
+  "n_urls": 300,
+  "conditions": {
+    "clean": {
+      "decode_rate": 1.0,
+      "accuracy": 0.97,
+      "precision": 0.993,
+      "recall": 0.9467,
+      "f1": 0.9693
+    },
+    "blur": {
+      "decode_rate": 0.9967,
+      "accuracy": 0.9699,
+      "precision": 0.993,
+      "recall": 0.9463,
+      "f1": 0.9691
+    },
+    "rotate": {
+      "decode_rate": 0.9967,
+      "accuracy": 0.9699,
+      "precision": 0.993,
+      "recall": 0.9463,
+      "f1": 0.9691
+    },
+    "noise": {
+      "decode_rate": 1.0,
+      "accuracy": 0.97,
+      "precision": 0.993,
+      "recall": 0.9467,
+      "f1": 0.9693
+    }
+  }
+}

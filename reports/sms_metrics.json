@@ -1,0 +1,140 @@
+{
+  "task": "sms",
+  "trained_at": "2026-10-28T23:23:05",
+  "dataset": {
+    "slug": "uciml/sms-spam-collection-dataset",
+    "file": "spam.csv",
+    "description": "UCI SMS Spam Collection - 5,574 labelled SMS messages"
+  },
+  "n_samples": 5169,
+  "n_train": 4135,
+  "n_test": 1034,
+  "phishing_rate": 0.1263,
+  "model_comparison_validation": {
+    "LogisticRegression": {
+      "accuracy": 0.9936,
+      "precision": 0.9744,
+      "recall": 0.9744,
+      "f1": 0.9744,
+      "roc_auc": 0.9997,
+      "train_seconds": 0.9
+    },
+    "LinearSVC (calibrated)": {
+      "accuracy": 0.9952,
+      "precision": 0.987,
+      "recall": 0.9744,
+      "f1": 0.9806,
+      "roc_auc": 0.9998,
+      "train_seconds": 0.9
+    },
+    "ComplementNB": {
+      "accuracy": 0.9839,
+      "precision": 0.925,
+      "recall": 0.9487,
+      "f1": 0.9367,
+      "roc_auc": 0.9959,
+      "train_seconds": 0.7
+    }
+  },
+  "selected_model": "LinearSVC (calibrated)",
+  "fit_seconds": 0.8,
+  "test_metrics": {
+    "accuracy": 0.9884,
+    "precision": 0.976,
+    "recall": 0.9313,
+    "f1": 0.9531,
+    "roc_auc": 0.9983
+  },
+  "confusion_matrix": [
+    [
+      900,
+      3
+    ],
+    [
+      9,
+      122
+    ]
+  ],
+  "top_phishing_features": [
+    {
+      "feature": "phonetoken",
+      "weight": 0.967
+    },
+    {
+      "feature": "text",
+      "weight": 0.866
+    },
+    {
+      "feature": "txt",
+      "weight": 0.763
+    },
+    {
+      "feature": "toke",
+      "weight": 0.73
+    },
+    {
+      "feature": "token",
+      "weight": 0.73
+    },
+    {
+      "feature": "tok",
+      "weight": 0.728
+    },
+    {
+      "feature": "ken",
+      "weight": 0.725
+    },
+    {
+      "feature": "oken ",
+      "weight": 0.714
+    },
+    {
+      "feature": "oken",
+      "weight": 0.713
+    },
+    {
+      "feature": "ken ",
+      "weight": 0.71
+    },
+    {
+      "feature": "oke",
+      "weight": 0.661
+    },
+    {
+      "feature": "free",
+      "weight": 0.588
+    },
+    {
+      "feature": "reply",
+      "weight": 0.585
+    },
+    {
+      "feature": "call phonetoken",
+      "weight": 0.543
+    },
+    {
+      "feature": "moneytoken",
+      "weight": 0.543
+    },
+    {
+      "feature": "to",
+      "weight": 0.536
+    },
+    {
+      "feature": "one",
+      "weight": 0.535
+    },
+    {
+      "feature": "net",
+      "weight": 0.533
+    },
+    {
+      "feature": "xt ",
+      "weight": 0.521
+    },
+    {
+      "feature": "50p",
+      "weight": 0.521
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Stop phishing <span>before you click</span>.</h1>
+    <p class="lead">PhishShield uses machine learning trained on 590,000+ real-world samples from Kaggle to detect phishing in
+      SMS, emails, links and QR codes. It explains <em>why</em> something is dangerous, so you learn to spot the next one yourself.</p>
+    <div class="hero-actions">
+      <a class="btn" href="/scan">🔍 Scan something now</a>
+      <a class="btn secondary" href="/training">🎯 Test your awareness</a>
+    </div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card stat"><div class="value">{{ "{:,}".format(stats.total_scans) }}</div><div class="label">Total scans</div></div>
+    <div class="card stat"><div class="value" style="color:var(--danger)">{{ "{:,}".format(stats.threats_blocked) }}</div><div class="label">Phishing detected</div></div>
+    {% set n = reports.values() | selectattr('n_samples', 'defined') | map(attribute='n_samples') | sum %}
+    <div class="card stat"><div class="value">{{ "{:,}".format(n) }}</div><div class="label">Training samples</div></div>
+    <div class="card stat"><div class="value">{{ stats.quiz_avg }}%</div><div class="label">Avg. quiz score</div></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Four attack channels, one shield</h2>
+  <div class="grid grid-4">
+    {% for key, icon, name, desc in [
+      ('sms', '💬', 'SMS / Messages', 'Smishing, fake delivery, KYC & lottery scams'),
+      ('email', '📧', 'Emails', 'Body analysis + header spoofing + attachment checks'),
+      ('url', '🔗', 'URLs', 'Typosquatting, brand impersonation, IP & risky TLDs'),
+      ('qr', '📷', 'QR Codes', 'Quishing, UPI payment scams, rogue Wi-Fi')] %}
+    <a class="card channel-card" href="/scan?tab={{ key }}">
+      <div class="icon">{{ icon }}</div><h3>{{ name }}</h3>
+      <p class="muted small">{{ desc }}</p>
+      {% if reports[key] %}
+        {% if key == 'qr' %}<span class="pill">decode rate {{ (reports.qr.conditions.clean.decode_rate*100)|round(1) }}%</span>
+        {% else %}<span class="pill">F1 {{ reports[key].test_metrics.f1 }} · AUC {{ reports[key].test_metrics.roc_auc }}</span>{% endif %}
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section grid grid-3">
+  <div class="card"><h3>🧠 Explainable AI</h3><p class="muted">See exactly which words, patterns and URL features made the model suspicious. No black box.</p></div>
+  <div class="card"><h3>🛡️ Hybrid detection</h3><p class="muted">ML probability is combined with expert red-flag rules (urgency, spoofing, brand abuse) into a single 0–100 risk score.</p></div>
+  <div class="card"><h3>🎓 Awareness training</h3><p class="muted">Interactive phishing simulations with instant feedback turn every user into a human firewall.</p></div>
+</section>
+{% endblock %}

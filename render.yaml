@@ -1,0 +1,10 @@
+# One-click deploy on Render: New + > Blueprint > select this repository.
+services:
+  - type: web
+    name: phishshield
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PORT
+        value: "7860"
