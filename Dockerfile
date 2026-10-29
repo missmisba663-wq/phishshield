@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libglib2.0-0 \
 # Hugging Face Spaces runs containers as a non-root user with UID 1000.
 RUN useradd -m -u 1000 app
 WORKDIR /home/app/phishshield
+RUN chown app:app /home/app/phishshield
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
